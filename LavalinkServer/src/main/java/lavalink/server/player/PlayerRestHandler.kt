@@ -59,17 +59,17 @@ class PlayerRestHandler(
     ): ResponseEntity<Player> {
         val context = socketContext(socketServer, sessionId)
 
-        if (playerUpdate.track.isPresent() && (playerUpdate.encodedTrack is Omissible.Present || playerUpdate.identifier is Omissible.Present)) {
+        if (playerUpdate.track.isPresent() && ((playerUpdate.track as Omissible.Present<PlayerUpdateTrack>).value.encoded is Omissible.Present || (playerUpdate.track as Omissible.Present<PlayerUpdateTrack>).value.identifier is Omissible.Present)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot specify both track and encodedTrack/identifier")
         }
 
         val track = if (playerUpdate.track.isPresent()) {
             playerUpdate.track
         } else {
-            if (playerUpdate.encodedTrack is Omissible.Present || playerUpdate.identifier is Omissible.Present) {
+            if ((playerUpdate.track as Omissible.Present<PlayerUpdateTrack>).value.encoded is Omissible.Present || (playerUpdate.track as Omissible.Present<PlayerUpdateTrack>).value.identifier is Omissible.Present) {
                 PlayerUpdateTrack(
-                    playerUpdate.encodedTrack,
-                    playerUpdate.identifier
+                    (playerUpdate.track as Omissible.Present<PlayerUpdateTrack>).value.encoded,
+                    (playerUpdate.track as Omissible.Present<PlayerUpdateTrack>).value.identifier
                 ).toOmissible()
             } else {
                 Omissible.Omitted()
